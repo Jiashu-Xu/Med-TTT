@@ -1,6 +1,6 @@
 # Med-TTT
 
-Official code repository for Med-TTT.
+Official code repository for Med-TTT: Vision Test-Time Training model for Medical Image Segmentation.
 
 ## Updates
 24 Sep 2024 (v0.0.0):
