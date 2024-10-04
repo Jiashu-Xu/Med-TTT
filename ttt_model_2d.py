@@ -54,6 +54,7 @@ class TTTModel2D(nn.Module):
         # Patch embedding
         self.patch_embed = nn.Conv2d(
             256+64+64,       # 合并高频实部和虚部后增加的通道数
+            #256+config.in_channels*2,
             config.hidden_size,
             kernel_size=config.patch_size,
             stride=config.patch_size
@@ -87,6 +88,16 @@ class TTTModel2D(nn.Module):
             nn.BatchNorm2d(256),
             nn.ReLU()
         )
+        '''''
+        self.mergebranch3 = nn.Sequential(
+            nn.Conv2d(384, 256, kernel_size=3, padding=1, stride=1),  # 下采样
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU()
+        )
+        '''''
         # Final normalization and classifier
         self.final_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
 
@@ -102,7 +113,7 @@ class TTTModel2D(nn.Module):
         imag = fft_x.imag
         return real, imag
 
-    def extract_high_frequency(self, real, imag, threshold=0.5):
+    def extract_high_frequency(self, real, imag, threshold=0.05):
         B, C, H, W = real.shape
         # 创建频率坐标
         u = torch.fft.fftfreq(H, d=1.0).to(real.device)
@@ -129,7 +140,7 @@ class TTTModel2D(nn.Module):
 
         # 计算傅里叶变换
         real, imag = self.compute_fft(images)  # [B, C, H, W]
-        high_freq_real, high_freq_imag = self.extract_high_frequency(real, imag, threshold=0.5)  # [B, C, H, W] each
+        high_freq_real, high_freq_imag = self.extract_high_frequency(real, imag, threshold=0.02)  # [B, C, H, W] each
 
         # 通过高分辨率分支
         x1 = self.branch1(images)  # [B, 64, H, W]
@@ -154,12 +165,20 @@ class TTTModel2D(nn.Module):
         # 处理高频实部和虚部
         freq_real = F.relu(self.freq_conv_real(high_freq_real))  # [B, 64, H, W]
         freq_imag = F.relu(self.freq_conv_imag(high_freq_imag))  # [B, 64, H, W]
+        #freq_imag = F.relu(self.freq_conv_imag(imag))
         freq_real = self.freq_bn_real(freq_real)
         freq_imag = self.freq_bn_imag(freq_imag)
+        #fft_x = torch.complex(high_freq_real, high_freq_imag)
+        #reconstructed = torch.fft.ifft2(fft_x).real
+        #freq_imag = F.relu(self.freq_conv_imag(reconstructed))
+        #freq_imag = self.freq_bn_imag(freq_imag)
         # 合并高频特征
         #x = torch.cat((x1, high_freq_real, high_freq_imag), dim=1)
         # Patch embedding
         x = torch.cat((x1, freq_real, freq_imag), dim=1)  # [B, 64 + 64 + 64, H, W]
+        #x = torch.cat((x1, freq_imag), dim=1)
+        #x = self.mergebranch3(x)
+        #x=x1
         x = self.patch_embed(x)  # [B, hidden_size, H_p, W_p]
         H_p, W_p = x.shape[2], x.shape[3]
         x = x.flatten(2).transpose(1, 2)  # [B, N_patches, hidden_size]
