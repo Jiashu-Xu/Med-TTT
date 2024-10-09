@@ -1,6 +1,6 @@
 # Med-TTT
 
-Official code repository for Med-TTT: Vision Test-Time Training model for Medical Image Segmentation. [![arXiv](https://img.shields.io/badge/arXiv-2410.02523-brightgreen.svg)](https://arxiv.org/abs/2410.02523)
+Official code repository for Med-TTT: Vision Test-Time Training model for Medical Image Segmentation. [![arXiv](https://img.shields.io/badge/arXiv-2410.02523-brightgreen.svg)](https://arxiv.org/abs/2410.02523) ![](https://img.shields.io/github/stars/Jiashu-Xu/Med-TTT?color=green&style=social)
 
 ## Updates
 04 Oct 2024 (v1.0.0):
@@ -60,14 +60,11 @@ python test-result.py
 If you use our work in your research, please cite our paper as follows:
 
 ```bibtex
-@misc{xu2024medtttvisiontesttimetraining,
-      title={Med-TTT: Vision Test-Time Training model for Medical Image Segmentation}, 
-      author={Jiashu Xu},
-      year={2024},
-      eprint={2410.02523},
-      archivePrefix={arXiv},
-      primaryClass={eess.IV},
-      url={https://arxiv.org/abs/2410.02523}, 
+@article{xu2024med,
+  title={Med-TTT: Vision Test-Time Training model for Medical Image Segmentation},
+  author={Xu, Jiashu},
+  journal={arXiv preprint arXiv:2410.02523},
+  year={2024}
 }
 ```
 # ✨Acknowledgments✨
